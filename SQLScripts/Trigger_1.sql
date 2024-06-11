@@ -7,31 +7,79 @@ BEGIN
     DECLARE @UserID INT;
     DECLARE @TransactionCount INT;
 
-    -- Pobranie ID usuwanego u¿ytkownika
+    -- Pobranie ID usuwanego uï¿½ytkownika
     SELECT @UserID = UserID FROM deleted;
 
-    -- Sprawdzenie, czy u¿ytkownik ma jakieœ transakcje
+    -- Sprawdzenie, czy uï¿½ytkownik ma jakieï¿½ transakcje
     SELECT @TransactionCount = COUNT(*)
     FROM Transactions
     WHERE UserID = @UserID;
 
-    -- Jeœli u¿ytkownik ma transakcje, anuluj usuniêcie i wypisz komunikat
+    -- Jeï¿½li uï¿½ytkownik ma transakcje, anuluj usuniï¿½cie i wypisz komunikat
     IF @TransactionCount > 0
     BEGIN
-        PRINT 'Nie mo¿na usun¹æ u¿ytkownika. U¿ytkownik ma przypisane transakcje.';
+        PRINT 'Nie moï¿½na usunï¿½ï¿½ uï¿½ytkownika. Uï¿½ytkownik ma przypisane transakcje.';
     END
     ELSE
     BEGIN
-        -- Usuñ u¿ytkownika
+        -- Usuï¿½ uï¿½ytkownika
         DELETE FROM Users
         WHERE UserID = @UserID;
 
         -- Wypisz komunikat
-        PRINT 'U¿ytkownik zosta³ usuniêty. U¿ytkownik nie mia³ ¿adnych transakcji na koncie.';
+        PRINT 'Uï¿½ytkownik zostaï¿½ usuniï¿½ty. Uï¿½ytkownik nie miaï¿½ ï¿½adnych transakcji na koncie.';
     END
 END;
 GO
 
 
--- Próbujemy usun¹æ u¿ytkownika o UserID 1 (Admin), który ma transakcje
+-- Prï¿½bujemy usunï¿½ï¿½ uï¿½ytkownika o UserID 1 (Admin), ktï¿½ry ma transakcje
 DELETE FROM Users WHERE UserID = 1;
+
+
+
+
+
+public void DeleteUser(int id)
+{
+    var user = _context.Users.Find(id);
+    if (user != null)
+    {
+        _context.Users.Remove(user);
+    }
+}
+
+
+private void DeleteUser_Click(object sender, RoutedEventArgs e)
+{
+    if (UsersListView.SelectedItem is User selectedUser)
+    {
+        _userService.DeleteUser(selectedUser.UserID);
+        LoadUsers();
+    }
+    else
+    {
+        MessageBox.Show("Please select a user to delete.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+}
+
+ public void UpdateUser(User user)
+ {
+     _context.Users.Update(user);
+ }
+
+  private void UpdateUser_Click(object sender, RoutedEventArgs e)
+ {
+     if (UsersListView.SelectedItem is User selectedUser)
+     {
+         selectedUser.Username = UsernameTextBox.Text;
+         selectedUser.Password = PasswordTextBox.Password;
+         selectedUser.Email = EmailTextBox.Text;
+         _userService.UpdateUser(selectedUser);
+         LoadUsers();
+     }
+     else
+     {
+         MessageBox.Show("Please select a user to update.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+     }
+ }

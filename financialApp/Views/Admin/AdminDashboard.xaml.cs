@@ -40,19 +40,44 @@ namespace financialApp.Views.Admin
                 Password = PasswordTextBox.Password,
                 Email = EmailTextBox.Text
             };
-            _userService.CreateUser(user);
-            LoadUsers();
+
+            try
+            {
+                _userService.CreateUser(user);
+                LoadUsers();
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An unexpected error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
+
 
         private void UpdateUser_Click(object sender, RoutedEventArgs e)
         {
             if (UsersListView.SelectedItem is User selectedUser)
             {
-                selectedUser.Username = UsernameTextBox.Text;
-                selectedUser.Password = PasswordTextBox.Password;
-                selectedUser.Email = EmailTextBox.Text;
-                _userService.UpdateUser(selectedUser);
-                LoadUsers();
+                try
+                {
+                    selectedUser.Username = UsernameTextBox.Text;
+                    selectedUser.Password = PasswordTextBox.Password;
+                    selectedUser.Email = EmailTextBox.Text;
+                    _userService.UpdateUser(selectedUser);
+                    LoadUsers();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An unexpected error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             else
             {
@@ -60,18 +85,34 @@ namespace financialApp.Views.Admin
             }
         }
 
+
+
+
         private void DeleteUser_Click(object sender, RoutedEventArgs e)
         {
             if (UsersListView.SelectedItem is User selectedUser)
             {
-                _userService.DeleteUser(selectedUser.UserID);
-                LoadUsers();
+                try
+                {
+                    _userService.DeleteUser(selectedUser.UserID);
+                    LoadUsers();
+                }
+                catch (InvalidOperationException ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An unexpected error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             else
             {
                 MessageBox.Show("Please select a user to delete.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+
 
         private void Logout_Click(object sender, RoutedEventArgs e)
         {

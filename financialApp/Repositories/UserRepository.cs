@@ -32,23 +32,85 @@ namespace financialApp.Repositories
 
         public void AddUser(User user)
         {
-            // Brak haszowania hasła przed dodaniem do bazy
-            _context.Users.Add(user);
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    _context.Users.Add(user);
+                    _context.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547) // 547 is the number for foreign key constraint violation
+                {
+                    transaction.Rollback();
+                    throw new InvalidOperationException("Cannot add user. User is referenced by other records.", ex);
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new InvalidOperationException("An unexpected error occurred while adding the user.", ex);
+                }
+            }
         }
+
+
 
         public void UpdateUser(User user)
         {
-            _context.Users.Update(user);
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    _context.Users.Update(user);
+                    _context.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547) // 547 is the number for foreign key constraint violation
+                {
+                    transaction.Rollback();
+                    throw new InvalidOperationException("Cannot update user. User is referenced by other records.", ex);
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new InvalidOperationException("An unexpected error occurred while updating the user.", ex);
+                }
+            }
         }
+
+
+
 
         public void DeleteUser(int id)
         {
             var user = _context.Users.Find(id);
             if (user != null)
             {
-                _context.Users.Remove(user);
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        _context.Users.Remove(user);
+                        _context.SaveChanges();
+                        transaction.Commit();
+                    }
+                    catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547) // 547 is the number for foreign key constraint violation
+                    {
+                        transaction.Rollback();
+                        throw new InvalidOperationException("Cannot delete user. User is referenced by other records (e.g., UserGroupMemberships).", ex);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw new InvalidOperationException("An unexpected error occurred while deleting the user.", ex);
+                    }
+                }
             }
         }
+
+
+
+
 
         public void Save()
         {

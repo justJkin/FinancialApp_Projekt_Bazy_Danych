@@ -2,7 +2,7 @@
 using System.Windows;
 using financialApp.Interfaces;
 using financialApp.Services;
-
+using System.Text.RegularExpressions;
 namespace financialApp.Views
 {
     public partial class RegistrationWindow : Window
@@ -23,6 +23,24 @@ namespace financialApp.Views
             string email = EmailTextBox.Text;
             string password = PasswordBox.Password;
             string confirmPassword = ConfirmPasswordBox.Password;
+
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                MessageBox.Show("All fields must be filled in", "Registration Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (username.Length > 50 || email.Length > 50 || password.Length > 50 || confirmPassword.Length > 50)
+            {
+                MessageBox.Show("Fields must not exceed 50 characters", "Registration Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!IsValidEmail(email))
+            {
+                MessageBox.Show("Invalid email address", "Registration Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
             if (password != confirmPassword)
             {
@@ -50,6 +68,22 @@ namespace financialApp.Views
             }
         }
 
+        private bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                // Najprostsze sprawdzenie formatu email
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         private void Login_Click(object sender, RoutedEventArgs e)
         {
             var loginWindow = new LoginWindow(_userService, _financialService);

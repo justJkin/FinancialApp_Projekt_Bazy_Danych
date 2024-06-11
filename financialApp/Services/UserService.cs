@@ -30,6 +30,22 @@ public class UserService : IUserService
 
     public void CreateUser(User user)
     {
+        if (string.IsNullOrWhiteSpace(user.Username) ||
+            string.IsNullOrWhiteSpace(user.Password) ||
+            string.IsNullOrWhiteSpace(user.Email))
+        {
+            throw new ArgumentException("Username, password, and email are required.");
+        }
+
+        if (_userRepository.GetAllUsers().Any(u => u.Username == user.Username))
+        {
+            throw new InvalidOperationException("Username already exists.");
+        }
+
+        // Setting role for new user
+        var adminExists = _userRepository.GetAllUsers().Any(u => u.Role == "Admin");
+        user.Role = adminExists ? "User" : "Admin";
+
         _userRepository.AddUser(user);
         _userRepository.Save();
     }
